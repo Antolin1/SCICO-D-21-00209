@@ -96,6 +96,7 @@ public class SAMOSRunner {
 
     // CLI interaction with standard functionalities of SAMOS
 	public static void main(String[] args) {
+		System.setProperty("org.slf4j.simpleLogger.logFile", "System.out");
 		
 		SAMOSRunner samos = new SAMOSRunner(args);		
 		
