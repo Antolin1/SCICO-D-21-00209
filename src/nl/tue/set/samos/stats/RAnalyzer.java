@@ -27,11 +27,11 @@
 package nl.tue.set.samos.stats;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 import org.rosuda.JRI.REXP;
 import org.rosuda.JRI.Rengine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import nl.tue.set.samos.main.SAMOSRunner;
 
 /**
  * This class uses the vsm output and performs various computations in R: domain clustering and clone detection. 
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 */ 
 public class RAnalyzer {
 	
-	final Logger logger = LoggerFactory.getLogger(RAnalyzer.class);
+	final Logger logger = Logger.getLogger(SAMOSRunner.class.getName());
 	
 	public Rengine re = null;
 	
@@ -57,10 +57,10 @@ public class RAnalyzer {
 	public boolean prepareR(){
 		String args_[] = {"--no-save"};
 		if (!Rengine.versionCheck()) {
-			logger.error("** Version mismatch - Java files don't match library version.");
+			logger.info("** Version mismatch - Java files don't match library version.");
 			return false;
 		}
-		logger.debug("Creating Rengine (with arguments)");
+		logger.info("Creating Rengine (with arguments)");
 		// 1) we pass the arguments from the command line
 		// 2) we won't use the main loop at first, we'll start it later
 		//    (that's the "false" as second argument)
@@ -69,7 +69,7 @@ public class RAnalyzer {
 		logger.info("Rengine created, waiting for R");
 		// the engine creates R is a new thread, so we should wait until it's ready
 		if (!re.waitForR()) {
-			logger.error("Cannot load R");
+			logger.info("Cannot load R");
 			return false;
 		}
 
