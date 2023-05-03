@@ -34,10 +34,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -73,7 +74,7 @@ import nl.tue.set.samos.nlp.NLP;
 import nl.tue.set.samos.stats.RAnalyzer;
 import nl.tue.set.samos.vsm.VSMBuilder;
 import com.opencsv.CSVReader;
-
+import java.util.logging.ConsoleHandler;
 
 /**
  * This is the main entry point and runner class for SAMOS. It gets the configuration options via CLI and runs SAMOS with those predefined settings:
@@ -92,11 +93,14 @@ import com.opencsv.CSVReader;
  */
 public class SAMOSRunner {
 	
-    private static Logger logger = LoggerFactory.getLogger(SAMOSRunner.class);
+    private static Logger logger = Logger.getLogger(SAMOSRunner.class.getName());
 
     // CLI interaction with standard functionalities of SAMOS
 	public static void main(String[] args) {
-		System.setProperty("org.slf4j.simpleLogger.logFile", "System.out");
+		ConsoleHandler consoleHandler = new ConsoleHandler();
+        consoleHandler.setLevel(Level.ALL);
+        logger.addHandler(consoleHandler);
+        logger.setLevel(Level.ALL);
 		
 		SAMOSRunner samos = new SAMOSRunner(args);		
 		
