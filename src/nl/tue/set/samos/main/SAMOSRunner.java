@@ -123,7 +123,7 @@ public class SAMOSRunner {
 			samos.buildVSMForClustering(_UNIT, _STRUCTURE);
 			samos.clusterInR();
 
-			generatePredictions(args[0], "results/");
+			generatePredictions(args[0], args[0] + File.separator + "results/");
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -161,8 +161,8 @@ public class SAMOSRunner {
 			configuration = new Configuration();
 			configuration.dataFolder = getInputFolder(root);
 			configuration.featureFolder = "features";
-			configuration.vsmFolder = "vsm/";		
-			configuration.rFolder = "results/";
+			configuration.vsmFolder = root + File.separator + "vsm/";		
+			configuration.rFolder = root + File.separator + "results/";
 			configuration._GOAL = GOAL.CLUSTER;
 			configuration.clusters = getNclusters(hyper);
 			configuration.root = root;
