@@ -125,8 +125,8 @@ public class NLP {
 	
 	// bulk load wordnet-related files
 	public void loadWordNet(){      
-      String wnhome 	= "wordnet/dict";
-      String icfile		= "wordnet/semcor/ic-semcor.dat";
+      String wnhome 	= "/scripts/SCICO-D-21-00209/wordnet/dict";
+      String icfile		= "/scripts/SCICO-D-21-00209/wordnet/semcor/ic-semcor.dat";
       URL url = null;
       try
       {
