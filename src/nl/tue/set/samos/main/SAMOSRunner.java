@@ -139,7 +139,9 @@ public class SAMOSRunner {
 	
 	public SAMOSRunner(String[] args) {
 		loadConfiguration(args);
+		logger.info("Configuration loaded!");
 		r = new RAnalyzer();
+		logger.info("R analyzer loaded!");
 		vsmBuilder = new VSMBuilder(configuration);
 		featureMap = null;
 	}
