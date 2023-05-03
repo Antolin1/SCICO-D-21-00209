@@ -100,9 +100,9 @@ public class RAnalyzer {
 		
 		
 		//logger.debug(System.getProperty("user.dir"));
-		String s = System.getProperty("user.dir").replaceAll("\\\\", "/");
-		rexp = re.eval("source(\"" + s + "/src/nl/tue/set/samos/stats/Clustering.R\")");
-		rexp = re.eval("source(\"" + s + "/src/nl/tue/set/samos/stats/CloneDetection.R\")");
+		// String s = System.getProperty("user.dir").replaceAll("\\\\", "/");
+		rexp = re.eval("source(\"" + "/scripts/SCICO-D-21-00209/src/nl/tue/set/samos/stats/Clustering.R\")");
+		rexp = re.eval("source(\"" + "/scripts/SCICO-D-21-00209/src/nl/tue/set/samos/stats/CloneDetection.R\")");
 		
 		return true;
 	}
