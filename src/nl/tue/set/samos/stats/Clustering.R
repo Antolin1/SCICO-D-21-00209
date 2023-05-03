@@ -27,7 +27,7 @@
 # method for clustering using vsm output files, exporting the results in the outputFolder. 
 #
 # This standard implementation uses cosine distance and hierarchical clustering with 0.8 distance cutoff. 
-cluster <- function(vsmFile, nameFile, outputFolder) {
+cluster <- function(vsmFile, nameFile, outputFolder, nclusters) {
 # load vsm file
 vsmMatrix <- read.csv(vsmFile, header=FALSE)
 names <- read.csv(nameFile, header=FALSE)
@@ -42,7 +42,7 @@ hc <- hclust(dist)
 hc$labels <- names$V1
 
 # regular cut at threshold = 0.8
-ct <- cutree(hc, h = 0.8)
+ct <- cutree(hc, k = nclusters)
 
 # turn into data frame
 df <- as.data.frame(ct)

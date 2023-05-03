@@ -108,9 +108,9 @@ public class RAnalyzer {
 	}
 	
 	// run the clustering script
-	public void cluster(String vsmFile, String nameFile, String outputFolder) {
+	public void cluster(String vsmFile, String nameFile, String outputFolder, int clusters) {
 		String command = "cluster(\"" + new File(vsmFile).getAbsolutePath() + "\",\"" + new File(nameFile).getAbsolutePath() + "\",\"" + 
-	new File(outputFolder).getAbsolutePath() + "\")";
+	new File(outputFolder).getAbsolutePath() + "\"" + "," + Integer.toString(clusters)+ ")";
 		command = command.replaceAll("\\\\", "/");
 		logger.info(command);
 		REXP rexp = re.eval(command);

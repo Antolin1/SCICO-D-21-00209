@@ -27,15 +27,23 @@
 package nl.tue.set.samos.main;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 import nl.tue.set.samos.common.Configuration;
 import nl.tue.set.samos.common.Constants;
@@ -64,6 +72,7 @@ import nl.tue.set.samos.feature.parser.JSONParser;
 import nl.tue.set.samos.nlp.NLP;
 import nl.tue.set.samos.stats.RAnalyzer;
 import nl.tue.set.samos.vsm.VSMBuilder;
+import com.opencsv.CSVReader;
 
 
 /**
@@ -88,66 +97,29 @@ public class SAMOSRunner {
     // CLI interaction with standard functionalities of SAMOS
 	public static void main(String[] args) {
 		
-		if (args.length == 3 && args[0].equals("--crawl") ) {
-			try {
-				Crawler.crawl(args[1], args[2]);
-			} catch (Exception e) {
-				logger.error("error in crawling: " + e.getMessage());
-			}
-			return;
-		}
-		else if (args.length == 2 && (args[0].equals("--clone") || args[0].equals("--cluster")))  {
-			// ok, continue below
-		}
-		else {
-			logger.error("Need two arguments for crawling (--crawl targetfolder) or running samos (--cluster targetfolder or --clone targetfolder)");
-			return;
-		}
-		
 		SAMOSRunner samos = new SAMOSRunner(args);		
 		
 		try {
-			if (args[0].substring(2).equalsIgnoreCase(GOAL.CLUSTER.toString())) {
-				// standard settings for clustering with UNIGRAM-NAME combination for the model scope
-				final SCOPE _SCOPE = SCOPE.MODEL; 
-				final UNIT _UNIT = UNIT.NAME; 
-				final STRUCTURE _STRUCTURE = STRUCTURE.UNIGRAM; 
+			// standard settings for clustering with UNIGRAM-NAME combination for the model scope
+			final SCOPE _SCOPE = SCOPE.MODEL; 
+			final UNIT _UNIT = UNIT.NAME; 
+			final STRUCTURE _STRUCTURE = STRUCTURE.UNIGRAM; 
 				
-				// preprocess model element names, tokenize them and lemmatize the tokens 
-				samos.PREPROCESS_TOKENIZE = true;
-				samos.PREPROCESS_LEMMATIZE = true;
+			// preprocess model element names, tokenize them and lemmatize the tokens 
+			samos.PREPROCESS_TOKENIZE = true;
+			samos.PREPROCESS_LEMMATIZE = true;
 				
-				// set the threshold for including model elements in clustering (i.e. filter out the smaller ones)
-				samos.MIN_MODEL_ELEMENT_COUNT_PER_FRAGMENT = 1;
+			// set the threshold for including model elements in clustering (i.e. filter out the smaller ones)
+			samos.MIN_MODEL_ELEMENT_COUNT_PER_FRAGMENT = 1;
 				
-				// run the three components: feature extraction, vsm computation and clustering
-				logger.info("Starting SAMOS with goal " + samos.configuration._GOAL + " " + "and parameters " + _SCOPE + "-" + _UNIT  + "-" + _STRUCTURE);
-				samos.extractFeatures(_SCOPE, _UNIT, _STRUCTURE);
-				samos.buildVSMForClustering(_UNIT, _STRUCTURE);
-				samos.clusterInR();
-			}
-			else if (args[0].substring(2).equalsIgnoreCase(GOAL.CLONE.toString())) {
-				// standard settings for clustering with ATTRIBUTED-NTREE combination for the EClass scope
-				final SCOPE _SCOPE = SCOPE.ECLASS; 
-				final UNIT _UNIT = UNIT.ATTRIBUTED; 
-				final STRUCTURE _STRUCTURE = STRUCTURE.NTREE; 
-				
-				// preprocess model element names, just lemmatize them
-				samos.PREPROCESS_TOKENIZE = false;
-				samos.PREPROCESS_LEMMATIZE = true;
-				
-				// set the threshold for including model elements in clustering (i.e. filter out the smaller ones)
-				samos.MIN_MODEL_ELEMENT_COUNT_PER_FRAGMENT = 5;
-			
-				// run the three components: feature extraction, vsm computation and clone detection
-				logger.info("Starting SAMOS with goal " + samos.configuration._GOAL + " " + "and parameters " + _SCOPE + "-" + _UNIT  + "-" + _STRUCTURE);
-				samos.extractFeatures(_SCOPE, _UNIT, _STRUCTURE);
-				samos.buildVSMForCloneDetection(_UNIT, _STRUCTURE);
-				samos.detectClonesInR();
-			}
-			else
-				logger.error("Unknown goal, not computing VSM or any analyses!");
+			// run the three components: feature extraction, vsm computation and clustering
+			logger.info("Starting SAMOS with goal " + samos.configuration._GOAL + " " + "and parameters " + _SCOPE + "-" + _UNIT  + "-" + _STRUCTURE);
+			samos.extractFeatures(_SCOPE, _UNIT, _STRUCTURE);
+			samos.buildVSMForClustering(_UNIT, _STRUCTURE);
+			samos.clusterInR();
 
+			generatePredictions(args[0], "results/");
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -175,24 +147,56 @@ public class SAMOSRunner {
 	// CONFIG
 	// set up configuration for folders and goal
 	private void loadConfiguration(String[] args){
+		String root = args[0];
+		String hyper = args[1];
 		
 		try{			
 			configuration = new Configuration();
-			configuration.modelFolder = args[1];
-			if (configuration.modelFolder.endsWith("/")) configuration.modelFolder = configuration.modelFolder.substring(0, configuration.modelFolder.length()-1);
-			configuration.dataFolder = "data/" + configuration.modelFolder;
-			
-			configuration.featureFolder = "results/features/" + configuration.modelFolder;
-			configuration.vsmFolder = "results/vsm/" + configuration.modelFolder + "/";		
-			
-			configuration.rFolder = "results/r/" + configuration.modelFolder + "/";
-			
-			configuration._GOAL = GOAL.valueOf(args[0].substring(2).toUpperCase());
+			configuration.dataFolder = getInputFolder(root);
+			configuration.featureFolder = "features";
+			configuration.vsmFolder = "vsm/";		
+			configuration.rFolder = "results/";
+			configuration._GOAL = GOAL.CLUSTER;
+			configuration.clusters = getNclusters(hyper);
+			configuration.root = root;
 			
 		} catch(Exception ex) {ex.printStackTrace();}
 				
 	}
+	
+	
 	// CONFIG END
+	
+	private static void generatePredictions(String root, String rFolder) throws IOException {
+		String csv = rFolder + File.separator + "clusterLabels.csv";
+		List<String> columnData = new ArrayList<>();
+
+        try (CSVReader reader = new CSVReader(new FileReader(csv))) {
+            String[] headers = reader.readNext(); // skip headers
+            String[] line;
+
+            while ((line = reader.readNext()) != null) {
+                columnData.add(line[0]); // assuming first column is the one you want
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        ObjectMapper mapper = new ObjectMapper();
+		ObjectWriter writer = mapper.writer();
+		writer.writeValue(new File(root + File.separator + "y_pred.json"), columnData);
+	}
+	
+	private static int getNclusters(String hyper) throws IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode rootNode = objectMapper.readTree(new File(hyper));
+		return rootNode.get("hyper").get("n_clusters").asInt();
+	}
+	
+	private static String getInputFolder(String root) throws IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode rootNode = objectMapper.readTree(new File(root + File.separator + "X_attrs.json"));
+		return root + File.separator +rootNode.get("xmi_folder").asText();
+	}
 	
 	// EXTRACTION
 	// extract features from the metamodels to feed the vsm computation
@@ -405,7 +409,8 @@ public class SAMOSRunner {
 		targetFolder.mkdirs();
 		
 		logger.info("running clustering in R");
-		r.cluster(configuration.vsmFolder + "/vsm-cluster.csv", configuration.vsmFolder + "/names.csv", configuration.rFolder);
+		r.cluster(configuration.vsmFolder + "/vsm-cluster.csv", configuration.vsmFolder + "/names.csv", 
+				configuration.rFolder, configuration.clusters);
 		r.finalize();
 	}
 	

@@ -29,6 +29,8 @@ package nl.tue.set.samos.common;
 import nl.tue.set.samos.common.enums.GOAL;
 
 public class Configuration {
-	public String modelFolder, dataFolder, featureFolder, vsmFolder, rFolder;
-	public GOAL _GOAL; 
+	public String dataFolder, featureFolder, vsmFolder, rFolder;
+	public GOAL _GOAL;
+	public int clusters;
+	public String root;
 }
