@@ -214,7 +214,7 @@ public class SAMOSRunner {
 	public void extractFeatures(SCOPE _SCOPE, UNIT _UNIT, STRUCTURE _STRUCTURE) {
 		File sourceFolder = new File(configuration.dataFolder);
 		if (!sourceFolder.exists()) {
-			logger.error("Folder " + sourceFolder.getAbsolutePath() + " not found!!!!");
+			logger.info("Folder " + sourceFolder.getAbsolutePath() + " not found!!!!");
 			return;
 		}
 		File[] fs = sourceFolder.listFiles(new FilenameFilter() {
