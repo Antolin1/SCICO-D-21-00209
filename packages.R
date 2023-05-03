@@ -1,0 +1,5 @@
+install.packages("dbscan",repos = "http://cran.us.r-project.org")
+install.packages("coop",repos = "http://cran.us.r-project.org")
+install.packages("bigmemory",repos = "http://cran.us.r-project.org")
+install.packages("uuid",repos = "http://cran.us.r-project.org")
+install.packages("vegan",repos = "http://cran.us.r-project.org")
