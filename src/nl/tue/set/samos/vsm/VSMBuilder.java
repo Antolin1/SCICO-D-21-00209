@@ -39,9 +39,8 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.Logger;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.SparseMatrix;
 
@@ -61,6 +60,7 @@ import nl.tue.set.samos.feature.TypedFeature;
 import nl.tue.set.samos.feature.compare.FeatureComparator;
 import nl.tue.set.samos.feature.parser.JSONParser;
 import nl.tue.set.samos.feature.parser.PlainTextParser;
+import nl.tue.set.samos.main.SAMOSRunner;
 import node.Node;
 
 /**
@@ -72,7 +72,7 @@ import node.Node;
 */ 
 public class VSMBuilder {
 	
-	final Logger logger = LoggerFactory.getLogger(VSMBuilder.class);
+	final Logger logger = Logger.getLogger(SAMOSRunner.class.getName());
 	
 	public FeatureComparator featureComparator;
 	
@@ -283,7 +283,7 @@ public class VSMBuilder {
 											weight += weightsMap.get(edgeType);
 										}
 										else {
-											logger.error("forgot to add weight for edge type?? " + edgeType);
+											logger.info("forgot to add weight for edge type?? " + edgeType);
 										}
 									}
 								}
@@ -321,7 +321,7 @@ public class VSMBuilder {
 											k++; // iterate one further
 										}
 										else {
-											logger.error("forgot to add weight for edge type?? " + edgeType);
+											logger.info("forgot to add weight for edge type?? " + edgeType);
 										}
 									}
 										
@@ -339,7 +339,7 @@ public class VSMBuilder {
 					}
 					
 				} catch(NullPointerException ex){
-					logger.error("Error " + j + " << " + f);
+					logger.info("Error " + j + " << " + f);
 					ex.printStackTrace();
 					System.exit(-1);
 				}
@@ -376,12 +376,12 @@ public class VSMBuilder {
 				{
 					int sum = params._IDF == IDF.LOG?0:1;
 					if (numOfDocsWithTerm == 0)
-						logger.error("ERROR ZERO numOfDocs at " + j + " = " + numOfDocsWithTerm);
+						logger.info("ERROR ZERO numOfDocs at " + j + " = " + numOfDocsWithTerm);
 					idfArray[j] = Math.log10(sum + (1.0 * totalDocs / numOfDocsWithTerm)); // note idf can have more variations
 					if (idfArray[j] == Double.NaN)
-						logger.error("ERROR NaN idf at " + j + " = " + idfArray[j]);
+						logger.info("ERROR NaN idf at " + j + " = " + idfArray[j]);
 					if (idfArray[j] == Double.POSITIVE_INFINITY)
-						logger.error("ERROR infinity idf at " + j + " = " + idfArray[j]);
+						logger.info("ERROR infinity idf at " + j + " = " + idfArray[j]);
 				}
 			}
 			
