@@ -160,7 +160,7 @@ public class SAMOSRunner {
 		try{			
 			configuration = new Configuration();
 			configuration.dataFolder = getInputFolder(root);
-			configuration.featureFolder = "features";
+			configuration.featureFolder = root + File.separator + "features/";
 			configuration.vsmFolder = root + File.separator + "vsm/";		
 			configuration.rFolder = root + File.separator + "results/";
 			configuration._GOAL = GOAL.CLUSTER;
