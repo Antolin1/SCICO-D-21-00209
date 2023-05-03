@@ -124,10 +124,12 @@ public class SAMOSRunner {
 			samos.clusterInR();
 
 			generatePredictions(args[0], args[0] + File.separator + "results/");
+			removeEverything(args[0]);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
 	}
 		
 	public HashMap<String, ArrayList<String>> featureMap;
@@ -191,6 +193,12 @@ public class SAMOSRunner {
         ObjectMapper mapper = new ObjectMapper();
 		ObjectWriter writer = mapper.writer();
 		writer.writeValue(new File(root + File.separator + "y_pred.json"), columnData);
+	}
+	
+	private static void removeEverything(String root) throws IOException {
+		FileUtils.deleteDirectory(new File(root + File.separator + "vsm/"));
+		FileUtils.deleteDirectory(new File(root + File.separator + "results/"));
+		FileUtils.deleteDirectory(new File(root + File.separator + "features/"));
 	}
 	
 	private static int getNclusters(String hyper) throws IOException {
