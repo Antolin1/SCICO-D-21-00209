@@ -136,7 +136,7 @@ public class VSMBuilder {
 						f = PlainTextParser.parseText(s);
 					 
 					if (f == null){
-						logger.error("ERROR: parsed null feature: " + f);
+						logger.info("ERROR: parsed null feature: " + f);
 					} else {
 						features.add(f);
 						if (!maximalFeatureSet.contains(f)) // construct a maximal feature set (i.e. all features in all files)
