@@ -31,6 +31,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Vector;
 
 import org.slf4j.Logger;
@@ -133,6 +134,8 @@ public class FileUtil {
 					return name.endsWith(fileExtension);
 				}				
 			});
+			Arrays.sort(files, (f1, f2) -> f1.getName().compareTo(f2.getName()));
+			
 			System.out.println(files.length);
 
 			for (int i=0; i<files.length; i++){

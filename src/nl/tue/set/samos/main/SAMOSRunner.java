@@ -33,6 +33,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -257,6 +258,7 @@ public class SAMOSRunner {
 		File[] fs = sourceFolder.listFiles(new FilenameFilter() {
 			public boolean accept(File arg0, String name) {
 				return (!name.contains("DS_Store") && name.toLowerCase().endsWith(targetExtension));}});
+		Arrays.sort(fs, (f1, f2) -> f1.getName().compareTo(f2.getName()));
 
 		File targetFolder = new File(configuration.featureFolder);
 		try {

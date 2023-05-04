@@ -559,6 +559,7 @@ public class NLP {
 	         															// redundant: checks all the n-gram files (if present)
 	              { return filename.endsWith(Constants.featureFileSuffix) /*&& filename.contains(_STRUCTURE.toString())*/; }
   	} );
+		Arrays.sort(featureFiles, (f1, f2) -> f1.getName().compareTo(f2.getName()));
 				
 		for(File ff : featureFiles)
 		{							

@@ -103,6 +103,7 @@ public class VSMBuilder {
 	         public boolean accept(File dir, String filename)
 	              { return filename.endsWith(midfix + Constants.featureFileSuffix); }
    	} );
+		Arrays.sort(ngramFiles, (f1, f2) -> f1.getName().compareTo(f2.getName()));
 		
 		ArrayList<String> allModelNames = new ArrayList<String>();
 		ArrayList<ArrayList<Feature>> allFeatures = new ArrayList<ArrayList<Feature>>();
