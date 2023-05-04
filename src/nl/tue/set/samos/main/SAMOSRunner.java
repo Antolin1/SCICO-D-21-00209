@@ -31,6 +31,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,10 +42,12 @@ import org.apache.commons.io.FileUtils;
 
 
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import nl.tue.set.samos.common.Configuration;
 import nl.tue.set.samos.common.Constants;
@@ -108,7 +111,7 @@ public class SAMOSRunner {
 			// standard settings for clustering with UNIGRAM-NAME combination for the model scope
 			final SCOPE _SCOPE = SCOPE.MODEL; 
 			final UNIT _UNIT = UNIT.NAME; 
-			final STRUCTURE _STRUCTURE = STRUCTURE.UNIGRAM; 
+			final STRUCTURE _STRUCTURE = STRUCTURE.UNIGRAM;//STRUCTURE.valueOf(getStructure(args[1]));//STRUCTURE.UNIGRAM; 
 				
 			// preprocess model element names, tokenize them and lemmatize the tokens 
 			samos.PREPROCESS_TOKENIZE = true;
@@ -124,7 +127,7 @@ public class SAMOSRunner {
 			samos.clusterInR();
 
 			generatePredictions(args[0], args[0] + File.separator + "results/");
-			removeEverything(args[0]);
+			// removeEverything(args[0]);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -178,21 +181,40 @@ public class SAMOSRunner {
 	
 	private static void generatePredictions(String root, String rFolder) throws IOException {
 		String csv = rFolder + File.separator + "clusterLabels.csv";
+		List<String> fileNames = getListFiles(root);
 		List<String> columnData = new ArrayList<>();
+		
+		for (String file : fileNames) {
+			try (CSVReader reader = new CSVReader(new FileReader(csv))) {
+	            String[] headers = reader.readNext(); // skip headers
+	            String[] line;
 
-        try (CSVReader reader = new CSVReader(new FileReader(csv))) {
-            String[] headers = reader.readNext(); // skip headers
-            String[] line;
-
-            while ((line = reader.readNext()) != null) {
-                columnData.add(line[0]); // assuming first column is the one you want
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+	            while ((line = reader.readNext()) != null) {
+	            	if (file.equals(line[1]))
+	            		columnData.add(line[0]); // assuming first column is the one you want
+	            }
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+		}
+        
         ObjectMapper mapper = new ObjectMapper();
 		ObjectWriter writer = mapper.writer();
 		writer.writeValue(new File(root + File.separator + "y_pred.json"), columnData);
+	}
+	
+	private static List<String> getListFiles(String root) throws IOException{
+		List<String> result = new ArrayList<>();
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode rootNode = objectMapper.readTree(new File(root + File.separator + "X.json"));
+		ArrayNode list = (ArrayNode) rootNode;
+		for (JsonNode jsonNode : list) {
+			String xmiPath = jsonNode.get("xmi_path").textValue();
+			xmiPath = root + File.separator + xmiPath;
+			result.add(Paths.get(xmiPath).getFileName().toString());
+		}
+		return result;
+		
 	}
 	
 	private static void removeEverything(String root) throws IOException {
@@ -206,6 +228,13 @@ public class SAMOSRunner {
 		JsonNode rootNode = objectMapper.readTree(new File(hyper));
 		return rootNode.get("hyper").get("n_clusters").asInt();
 	}
+	
+	private static String getStructure(String hyper) throws IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode rootNode = objectMapper.readTree(new File(hyper));
+		return rootNode.get("hyper").get("structure").asText();
+	}
+	
 	
 	private static String getInputFolder(String root) throws IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
